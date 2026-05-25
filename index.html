@@ -8,49 +8,32 @@
 body{
     text-align:center;
     background:#eef9ee;
-    font-family:"맑은 고딕";
-}
-
-h1{
-    color:#2e7d32;
 }
 
 #treeArea{
     position:relative;
     width:500px;
     height:500px;
-    margin:30px auto;
+    margin:auto;
 }
 
 #tree{
-    font-size:250px;
     position:absolute;
     bottom:0;
     left:50%;
     transform:translateX(-50%);
+    width:250px;
 }
 
 .leaf{
     position:absolute;
-    font-size:30px;
+    font-size:28px;
+    cursor:pointer;
+    transition:0.3s;
 }
 
-#messages{
-    width:600px;
-    margin:20px auto;
-    text-align:left;
-    background:white;
-    padding:15px;
-    border-radius:10px;
-}
-
-input{
-    width:350px;
-    padding:10px;
-}
-
-button{
-    padding:10px 20px;
+.leaf:hover{
+    transform:scale(1.4) rotate(10deg);
 }
 </style>
 </head>
@@ -59,57 +42,49 @@ button{
 
 <h1>🌳 노담나무 🌳</h1>
 
-<p>노담 다짐이나 응원 문구를 작성해 보세요!</p>
+<input id="text" placeholder="노담 다짐 입력">
+<input id="name" placeholder="이름">
+<button onclick="addData()">등록</button>
 
 <div id="treeArea">
-    <div id="tree">🌳</div>
+    <img id="tree" src="tree1.png">
 </div>
 
-<input type="text" id="promise" placeholder="노담 문구 입력">
-<button onclick="addLeaf()">추가하기</button>
+<script type="module">
 
-<div id="messages">
-    <h3>🍃 노담 약속</h3>
-</div>
+// ===== Firebase =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<script>
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_ID"
+};
 
-let count = 0;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-function addLeaf(){
+// ===== 가지 위치 =====
+const points = [
+ {x:240,y:180},{x:200,y:160},{x:280,y:160},
+ {x:170,y:130},{x:300,y:130},{x:220,y:100},
+ {x:260,y:100},{x:190,y:80},{x:290,y:80},
+ {x:230,y:60}
+];
 
-    let text = document.getElementById("promise").value;
+let index = 0;
 
-    if(text.trim() === ""){
-        alert("문구를 입력하세요!");
-        return;
-    }
+// ===== 데이터 추가 =====
+window.addData = async function(){
 
-    count++;
+    const text = document.getElementById("text").value;
+    const name = document.getElementById("name").value;
 
-    let leaf = document.createElement("div");
-    leaf.className = "leaf";
+    await addDoc(collection(db,"leaves"),{
+        text,
+        name,
+        type: Math.random()>0.5?"🍃":"🌸"
+    });
 
-    leaf.innerHTML =
-        Math.random() > 0.5 ? "🍃" : "🌸";
-
-    leaf.style.left =
-        (80 + Math.random()*320) + "px";
-
-    leaf.style.top =
-        (50 + Math.random()*250) + "px";
-
-    document.getElementById("treeArea")
-            .appendChild(leaf);
-
-    document.getElementById("messages")
-            .innerHTML +=
-            "<p>" + count + ". " + text + "</p>";
-
-    document.getElementById("promise").value="";
-}
-
-</script>
-
-</body>
-</html>
+    document.getElementById("text").value="";
