@@ -11,7 +11,6 @@ body{
     font-family:Arial;
 }
 
-/* 🌳 전체 영역 */
 #treeArea{
     position:relative;
     width:500px;
@@ -22,74 +21,70 @@ body{
     overflow:hidden;
 }
 
-/* 🌳 나무 줄기 (절대 고정) */
+/* 🌳 줄기 고정 */
 #trunk{
     position:absolute;
     bottom:0;
     left:50%;
     transform:translateX(-50%);
     font-size:160px;
-    z-index:1;
 }
 
-/* 🍃 잎/꽃 */
+/* 🍃 잎 */
 .leaf{
     position:absolute;
     font-size:26px;
-    transition:0.4s;
-    z-index:2;
+    transition:0.3s;
 }
 
-.leaf:hover{
-    transform:scale(1.5) rotate(10deg);
-}
-
-/* 📝 기록 */
 #log{
     width:500px;
     margin:auto;
     text-align:left;
-    background:#fff;
+    background:white;
     padding:10px;
     margin-top:10px;
-    border-radius:10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🌳 노담나무 캠페인 🌳</h1>
+<h1>🌳 노담나무 🌳</h1>
 
 <input id="name" placeholder="이름">
 <input id="text" placeholder="노담 다짐">
-<button onclick="addData()">등록</button>
+<button onclick="addLeaf()">등록</button>
 
 <div id="treeArea">
     <div id="trunk">🌳</div>
 </div>
 
-<h3>📋 참여 기록</h3>
+<h3>📋 기록</h3>
 <div id="log"></div>
 
 <script>
 
 let count = 0;
 
-/* 🌳 줄기 기준 위로 쌓이는 위치 */
-function getPosition(i){
+/* 🌳 “성장 영역” (핵심) */
+function getGrowArea(){
 
-    const baseX = 250;   // 가운데 기준
-    const baseY = 500;   // 바닥 기준
+    const baseX = 250;
+    const baseBottom = 500;
+
+    // 🌳 나무가 클수록 위로 영역 확장
+    const height = count * 12;
 
     return {
-        x: baseX + (Math.random()*120 - 60),
-        y: baseY - (i * 25)
+        xMin: baseX - 80,
+        xMax: baseX + 80,
+        yMin: baseBottom - height,
+        yMax: baseBottom - 20
     };
 }
 
-/* 🧠 데이터 추가 */
-function addData(){
+function addLeaf(){
 
     const name = document.getElementById("name").value;
     const text = document.getElementById("text").value;
@@ -98,31 +93,27 @@ function addData(){
 
     count++;
 
-    /* 🌳 나무 살짝 성장 */
-    const trunk = document.getElementById("trunk");
-    trunk.style.fontSize = (160 + count*2) + "px";
+    const area = getGrowArea();
 
-    /* 🍃 위치 생성 */
-    const pos = getPosition(count);
+    /* 🍃 반드시 “현재 나무 영역 안”에서 생성 */
+    const x = Math.random() * (area.xMax - area.xMin) + area.xMin;
+    const y = Math.random() * (area.yMax - area.yMin) + area.yMin;
 
     const leaf = document.createElement("div");
     leaf.className = "leaf";
 
     leaf.innerHTML = Math.random() > 0.5 ? "🍃" : "🌸";
 
-    leaf.style.left = pos.x + "px";
-    leaf.style.top = pos.y + "px";
+    leaf.style.left = x + "px";
+    leaf.style.top = y + "px";
 
     leaf.title = name + " : " + text;
 
     document.getElementById("treeArea").appendChild(leaf);
 
-    /* 📋 아래 기록 추가 */
-    const log = document.getElementById("log");
-
-    log.innerHTML += `
-        <div>🌱 <b>${name}</b> : ${text}</div>
-    `;
+    /* 📋 기록 */
+    document.getElementById("log").innerHTML +=
+        `🌱 <b>${name}</b> : ${text}<br>`;
 
     /* 입력 초기화 */
     document.getElementById("text").value = "";
