@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>노담나무 캠페인</title>
+<title>흡연 권유 거절 나무</title>
 
 <style>
 body{
@@ -15,48 +15,37 @@ h1{
     color:#2e7d32;
 }
 
-.container{
-    display:flex;
-    justify-content:center;
-    gap:30px;
-    flex-wrap:wrap;
-}
-
-/* 🌳 공통 나무 영역 */
-.treeBox{
-    width:450px;
+#treeArea{
+    position:relative;
+    width:500px;
     height:600px;
+    margin:auto;
     border:1px solid #ddd;
     background:white;
-    position:relative;
     overflow:hidden;
 }
 
-.title{
-    font-weight:bold;
-    margin:10px 0;
-}
-
 /* 🌳 줄기 */
-.trunk{
+#trunk{
     position:absolute;
     bottom:0;
     left:50%;
     transform:translateX(-50%);
-    font-size:150px;
+    font-size:160px;
 }
 
-/* 🍃 잎 */
+/* 🍃 */
 .leaf{
     position:absolute;
-    font-size:24px;
+    font-size:26px;
+    transition:0.3s;
 }
 
-/* 📋 기록 */
-.log{
-    width:450px;
-    text-align:left;
+/* 📋 */
+#log{
+    width:500px;
     margin:auto;
+    text-align:left;
     background:white;
     padding:10px;
     margin-top:10px;
@@ -68,97 +57,84 @@ h1{
 
 <body>
 
-<h1>🌳 노담 캠페인 🌳</h1>
+<h1>🚫 흡연 권유 거절 나무 🚫</h1>
 
 <input id="name" placeholder="이름">
-<input id="text" placeholder="문구 입력">
-<select id="type">
-    <option value="nodam">노담 실천 🌳</option>
-    <option value="refuse">흡연 권유 거절 🚫</option>
-</select>
-
+<input id="text" placeholder="거절 문구">
 <button onclick="addLeaf()">등록</button>
 
-<div class="container">
-
-    <!-- 🌳 1번 나무 -->
-    <div>
-        <div class="title">🌳 노담 실천 문구</div>
-        <div class="treeBox" id="tree1">
-            <div class="trunk">🌳</div>
-        </div>
-        <div class="log" id="log1"></div>
-    </div>
-
-    <!-- 🌳 2번 나무 -->
-    <div>
-        <div class="title">🚫 흡연 권유 거절 문구</div>
-        <div class="treeBox" id="tree2">
-            <div class="trunk">🌳</div>
-        </div>
-        <div class="log" id="log2"></div>
-    </div>
-
+<div id="treeArea">
+    <div id="trunk">🌳</div>
 </div>
+
+<h3>📋 기록</h3>
+<div id="log"></div>
 
 <script>
 
-let count1 = 0;
-let count2 = 0;
+const positions = [];
 
-/* 🌳 위치 생성 */
-function getPos(count){
+/* 🌳 충돌 없는 “원형 확산” 위치 생성 */
+function getSpreadPosition(){
 
-    const baseX = 220;
-    const baseY = 550;
+    const centerX = 250;
+    const centerY = 450;
 
-    return {
-        x: baseX + (Math.random()*120 - 60),
-        y: baseY - (count * 20)
-    };
+    for(let i=0;i<200;i++){
+
+        // 🌳 반지름이 점점 커짐 (확산 느낌)
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 200;
+
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY - Math.sin(angle) * radius;
+
+        let ok = true;
+
+        // 🚫 겹침 방지
+        for(const p of positions){
+            const dx = p.x - x;
+            const dy = p.y - y;
+
+            if(Math.sqrt(dx*dx + dy*dy) < 30){
+                ok = false;
+                break;
+            }
+        }
+
+        if(ok){
+            positions.push({x,y});
+            return {x,y};
+        }
+    }
+
+    // fallback
+    return {x:250,y:450};
 }
 
 function addLeaf(){
 
     const name = document.getElementById("name").value;
     const text = document.getElementById("text").value;
-    const type = document.getElementById("type").value;
 
     if(name === "" || text === "") return;
 
+    const pos = getSpreadPosition();
+
     const leaf = document.createElement("div");
     leaf.className = "leaf";
-    leaf.innerHTML = Math.random()>0.5 ? "🍃" : "🌸";
 
-    if(type === "nodam"){
+    leaf.innerHTML = Math.random()>0.5 ? "🚫" : "🍃";
 
-        count1++;
+    leaf.style.left = pos.x + "px";
+    leaf.style.top = pos.y + "px";
 
-        const pos = getPos(count1);
+    leaf.title = name + " : " + text;
 
-        leaf.style.left = pos.x + "px";
-        leaf.style.top = pos.y + "px";
+    document.getElementById("treeArea").appendChild(leaf);
 
-        document.getElementById("tree1").appendChild(leaf);
-
-        document.getElementById("log1").innerHTML +=
-            `🌱 <b>${name}</b> : ${text}<br>`;
-    }
-
-    else{
-
-        count2++;
-
-        const pos = getPos(count2);
-
-        leaf.style.left = pos.x + "px";
-        leaf.style.top = pos.y + "px";
-
-        document.getElementById("tree2").appendChild(leaf);
-
-        document.getElementById("log2").innerHTML +=
-            `🚫 <b>${name}</b> : ${text}<br>`;
-    }
+    document.getElementById("log").innerHTML +=
+        `🚫 <b>${name}</b> : ${text}<br>`;
 
     document.getElementById("text").value = "";
 }
