@@ -11,26 +11,25 @@ body{
     font-family:Arial;
 }
 
-h1{
-    color:#2e7d32;
-}
-
+/* 🌳 전체 영역 */
 #treeArea{
     position:relative;
     width:500px;
-    height:500px;
+    height:600px;
     margin:auto;
+    border:1px solid #ddd;
+    background:white;
     overflow:hidden;
 }
 
-/* 🌳 나무 줄기 */
+/* 🌳 나무 줄기 (절대 고정) */
 #trunk{
-    font-size:180px;
     position:absolute;
     bottom:0;
     left:50%;
-    transform:translateX(-50%) scale(1);
-    transition:1s;
+    transform:translateX(-50%);
+    font-size:160px;
+    z-index:1;
 }
 
 /* 🍃 잎/꽃 */
@@ -38,88 +37,95 @@ h1{
     position:absolute;
     font-size:26px;
     transition:0.4s;
+    z-index:2;
 }
 
 .leaf:hover{
     transform:scale(1.5) rotate(10deg);
 }
 
-input, button{
+/* 📝 기록 */
+#log{
+    width:500px;
+    margin:auto;
+    text-align:left;
+    background:#fff;
     padding:10px;
-    margin:5px;
+    margin-top:10px;
+    border-radius:10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🌳 노담나무 🌳</h1>
+<h1>🌳 노담나무 캠페인 🌳</h1>
 
 <input id="name" placeholder="이름">
 <input id="text" placeholder="노담 다짐">
-<button onclick="addLeaf()">등록</button>
+<button onclick="addData()">등록</button>
 
 <div id="treeArea">
     <div id="trunk">🌳</div>
 </div>
 
+<h3>📋 참여 기록</h3>
+<div id="log"></div>
+
 <script>
 
-let growth = 0;
+let count = 0;
 
-// 🌳 가지 위치 (위로 갈수록 작게 퍼짐)
-const branches = [
-  {x:240,y:200},
-  {x:200,y:180},
-  {x:280,y:180},
-  {x:170,y:150},
-  {x:300,y:150},
-  {x:220,y:120},
-  {x:260,y:120},
-  {x:190,y:90},
-  {x:290,y:90},
-  {x:230,y:60}
-];
+/* 🌳 줄기 기준 위로 쌓이는 위치 */
+function getPosition(i){
 
-function addLeaf(){
+    const baseX = 250;   // 가운데 기준
+    const baseY = 500;   // 바닥 기준
+
+    return {
+        x: baseX + (Math.random()*120 - 60),
+        y: baseY - (i * 25)
+    };
+}
+
+/* 🧠 데이터 추가 */
+function addData(){
 
     const name = document.getElementById("name").value;
     const text = document.getElementById("text").value;
 
     if(name === "" || text === "") return;
 
-    if(growth >= branches.length){
-        alert("🌳 나무가 충분히 성장했어요!");
-        return;
-    }
+    count++;
 
-    // 🌳 성장 증가
-    growth++;
-
-    // 🌳 나무 커짐
+    /* 🌳 나무 살짝 성장 */
     const trunk = document.getElementById("trunk");
-    trunk.style.transform =
-        `translateX(-50%) scale(${1 + growth * 0.1})`;
+    trunk.style.fontSize = (160 + count*2) + "px";
 
-    // 🍃 잎 생성
+    /* 🍃 위치 생성 */
+    const pos = getPosition(count);
+
     const leaf = document.createElement("div");
     leaf.className = "leaf";
 
     leaf.innerHTML = Math.random() > 0.5 ? "🍃" : "🌸";
 
-    leaf.style.left = branches[growth-1].x + "px";
-    leaf.style.top = branches[growth-1].y + "px";
+    leaf.style.left = pos.x + "px";
+    leaf.style.top = pos.y + "px";
 
     leaf.title = name + " : " + text;
 
-    // 클릭 효과
-    leaf.onclick = () => {
-        leaf.style.transform = "scale(1.6) rotate(15deg)";
-        setTimeout(()=>leaf.style.transform="",300);
-    };
-
     document.getElementById("treeArea").appendChild(leaf);
 
+    /* 📋 아래 기록 추가 */
+    const log = document.getElementById("log");
+
+    log.innerHTML += `
+        <div>🌱 <b>${name}</b> : ${text}</div>
+    `;
+
+    /* 입력 초기화 */
+    document.getElementById("text").value = "";
 }
 
 </script>
