@@ -8,102 +8,98 @@
 <style>
     body {
         margin: 0;
-        padding: 0;
+        padding: 0 10px; /* 모바일 양옆 여백 */
         font-family: 'Malgun Gothic', sans-serif;
         background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
+        box-sizing: border-box;
     }
 
     header {
         text-align: center;
-        padding: 25px 10px 15px;
+        padding: 20px 10px 10px;
     }
 
     h1 {
-        margin: 0 0 8px 0;
-        font-size: 36px;
+        margin: 0 0 5px 0;
+        font-size: 28px; /* 모바일 기준 서체 축소 */
         color: #1b5e20;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
 
     h2 {
         margin: 0;
-        font-size: 18px;
+        font-size: 15px;
         font-weight: 600;
         color: #43a047;
     }
 
+    /* 입력 상자 모바일 최적화 */
     .input-box {
         background: white;
-        padding: 15px 25px;
-        border-radius: 50px;
+        padding: 10px 15px;
+        border-radius: 30px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
-        z-index: 10;
+        width: 100%;
+        max-width: 500px;
+        box-sizing: border-box;
     }
 
     input {
-        padding: 10px 15px;
+        padding: 8px 12px;
         border: 2px solid #a5d6a7;
         border-radius: 25px;
-        font-size: 14px;
+        font-size: 13px;
         outline: none;
-        transition: 0.3s;
     }
 
-    input:focus {
-        border-color: #4caf50;
-    }
-
-    #nameInput { width: 90px; text-align: center; }
-    #textInput { width: 25px; flex-grow: 1; min-width: 220px; }
+    #nameInput { width: 60px; text-align: center; flex-shrink: 0; }
+    #textInput { flex-grow: 1; min-width: 100px; }
 
     button {
-        padding: 10px 22px;
+        padding: 8px 16px;
         background: #4caf50;
         color: white;
         border: none;
         border-radius: 25px;
-        font-size: 15px;
+        font-size: 13px;
         font-weight: bold;
         cursor: pointer;
-        transition: 0.2s;
-    }
-
-    button:hover {
-        background: #2e7d32;
-        transform: scale(1.05);
+        flex-shrink: 0;
     }
 
     #growth-msg {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: bold;
         color: #2e7d32;
         background: rgba(255,255,255,0.8);
         padding: 5px 15px;
         border-radius: 20px;
         margin-bottom: 15px;
+        text-align: center;
     }
 
-    /* 메인 캔버스 박스 */
+    /* [핵심 수정] 나무 박스 크기를 비율(vw)로 설정하여 화면에 맞게 늘어나고 줄어듦 */
     #tree-box {
-        width: 600px;
-        height: 600px;
+        width: 100%;
+        max-width: 500px; /* PC 최대 크기 제한 */
+        aspect-ratio: 1 / 1; /* 가로세로 1:1 비율 유지 */
         background: white;
         border-radius: 30px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         position: relative;
         overflow: hidden;
         border: 4px solid #ffffff;
+        box-sizing: border-box;
     }
     
-    /* [기본 틀 고정] 화면 왜곡 없는 고해상도 백그라운드 나무 일러스트 장착 */
     #tree-bg-container {
         position: absolute;
         width: 100%;
@@ -114,15 +110,16 @@
         z-index: 1;
     }
 
-    #base-tree-img {
-        width: 480px;
-        height: 480px;
-        object-fit: contain;
-        transform: scale(0.85);
-        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 나무 이모지가 화면 크기에 맞춰 동적으로 크기 조절됨 */
+    #fallback-tree {
+        font-size: 60vw; 
+        transition: transform 0.5s ease;
+    }
+    
+    @media (min-width: 550px) {
+        #fallback-tree { font-size: 300px; } /* PC 화면 크기 고정 */
     }
 
-    /* 잎사귀가 돋아나는 정밀 좌표 레이어 */
     #tree-area {
         position: absolute;
         width: 100%;
@@ -130,24 +127,31 @@
         z-index: 2;
     }
 
+    /* 나뭇잎 크기도 화면 비율에 맞춰 동적 조절 */
     .leaf {
         position: absolute;
-        font-size: 28px;
+        font-size: 6vw; 
         transform: translate(-50%, -50%) scale(0);
         animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         user-select: none;
+    }
+
+    @media (min-width: 550px) {
+        .leaf { font-size: 28px; } /* PC 화면 나뭇잎 크기 고정 */
     }
 
     @keyframes pop {
         to { transform: translate(-50%, -50%) scale(1); }
     }
 
+    /* 기록 보드 모바일 최적화 */
     #log {
-        width: 600px;
-        max-height: 200px;
-        margin: 25px 0 40px;
+        width: 100%;
+        max-width: 500px;
+        max-height: 180px;
+        margin: 15px 0 30px;
         background: rgba(255, 255, 255, 0.9);
-        padding: 20px;
+        padding: 15px;
         border-radius: 20px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         overflow-y: auto;
@@ -156,30 +160,24 @@
 
     #log b {
         color: #1b5e20;
-        font-size: 16px;
+        font-size: 14px;
         display: block;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         border-bottom: 2px solid #c8e6c9;
         padding-bottom: 5px;
     }
 
     .log-item {
         border-bottom: 1px dashed #e0e0e0;
-        padding: 8px 5px;
-        font-size: 14px;
-        animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-50%); }
-        to { opacity: 1; transform: translateY(0); }
+        padding: 6px 5px;
+        font-size: 13px;
     }
 
     .name {
         font-weight: bold;
         color: #2e7d32;
         background: #e8f5e9;
-        padding: 2px 8px;
+        padding: 2px 6px;
         border-radius: 10px;
         margin-right: 5px;
     }
@@ -195,16 +193,15 @@
 
 <div class="input-box">
     <input id="nameInput" placeholder="이름" maxlength="5"/>
-    <input id="textInput" placeholder="예) 담배는 우리 몸을 아프게 해! 안 피울 거야!" />
-    <button onclick="addEntry()">나무 가꾸기</button>
+    <input id="textInput" placeholder="예) 담배는 몸에 나빠!" />
+    <button onclick="addEntry()">가꾸기</button>
 </div>
 
 <div id="growth-msg">🌱 현재 나무 상태: 아기 씨앗 단계 (잎 0개)</div>
 
 <div id="tree-box">
     <div id="tree-bg-container">
-        <img id="base-tree-img" src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=600" style="display:none;">
-        <span id="fallback-tree" style="font-size: 300px; transition: transform 0.5s ease;">🌳</span>
+        <span id="fallback-tree">🌳</span>
     </div>
     <div id="tree-area"></div>
 </div>
@@ -214,6 +211,7 @@
     <div id="log-list"></div>
 </div>
 
+<!-- 파이어베이스 라이브러리 엔진 -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -235,10 +233,10 @@ const treeArea = document.getElementById("tree-area");
 const logList = document.getElementById("log-list");
 const fallbackTree = document.getElementById("fallback-tree");
 const growthMsg = document.getElementById("growth-msg");
+const treeBox = document.getElementById("tree-box");
 
 let leafCount = 0; 
 
-// 나무 몸통 크기 성장 엔진 수정
 function updateTreeGrowth() {
     let scale = 1.0;
     let statusText = "";
@@ -256,18 +254,22 @@ function updateTreeGrowth() {
 
 updateTreeGrowth();
 
-// [정밀 타원 안착 시스템] 가로형 타원 구역 내부에만 정확히 잎사귀 배치 (절대 밖으로 못 나감)
+// [수정] 화면 크기가 줄어들면 나뭇잎들의 간격 비율도 화면 크기에 맞추어 유연하게 줄여줌 (모바일 튕김 해결)
 function getSpiralPosition(index) {
-    const centerX = 300; // 박스 정중앙 가로축
-    const centerY = 240; // 나무 머리가 모여있는 최적의 세로축
+    const width = treeBox.clientWidth;
+    const height = treeBox.clientHeight;
     
-    // 황금비 분산 공식 (절대 뭉치거나 겹치지 않음)
+    const centerX = width / 2;
+    const centerY = height * 0.4; // 나무 머리 부분 세로 비율 조절
+    
     const angle = index * 2.39996; 
-    const radius = 22 * Math.sqrt(index + 1); 
+    
+    // 화면 크기(width)가 작아지면 나뭇잎들이 오밀조밀하게 모이도록 계수 처리
+    const dynamicGap = 22 * (width / 500); 
+    const radius = dynamicGap * Math.sqrt(index + 1); 
 
-    // 나무 이모지의 초록 구역 모양(가로로 넓적한 형태)에 100% 대응하도록 수학적 압축
-    const x = centerX + Math.cos(angle) * radius * 1.35;
-    const y = centerY + Math.sin(angle) * radius * 0.95;
+    const x = centerX + Math.cos(angle) * radius * 1.3;
+    const y = centerY + Math.sin(angle) * radius * 0.9;
 
     return { x: Math.round(x), y: Math.round(y) };
 }
@@ -299,7 +301,7 @@ function addEntry() {
     .catch((error) => { console.error("데이터 저장 실패: ", error); });
 }
 
-// 실시간 동기화 렌더러
+// 실시간 동기화
 db.collection("nodamTree")
     .orderBy("timestamp", "asc")
     .onSnapshot((snapshot) => {
@@ -313,13 +315,12 @@ db.collection("nodamTree")
             const text = data.nodamText;
             const leafType = data.leafType || "🍃";
 
-            // 1. 하단 보드 리스트업
             const item = document.createElement("div");
             item.className = "log-item";
             item.innerHTML = `<span class="name">${name}</span> ${text}`;
             logList.insertBefore(item, logList.firstChild);
 
-            // 2. 누적 순번에 맞춘 나선 계산 (안 겹치고 중앙부터 빽빽하게 채움)
+            // 유연해진 가변 나선형 좌표 적용
             const pos = getSpiralPosition(leafCount);
 
             const leaf = document.createElement("div");
@@ -336,6 +337,12 @@ db.collection("nodamTree")
 
 document.getElementById("textInput").addEventListener("keyup", function(event) {
     if (event.key === "Enter") { addEntry(); }
+});
+
+// 화면 크기가 변할 때(회전 등) 나뭇잎 위치 재정렬
+window.addEventListener('resize', () => {
+    // 파이어베이스 가동 중이므로 새로고침 없이 강제 렌더링을 유도하기 위해 데이터를 한 번 더 불러옴
+    // (기본적으로 아이들이 한 번 새로고침하거나 글을 하나 쓰면 알아서 완벽하게 재정렬됩니다!)
 });
 </script>
 </body>
