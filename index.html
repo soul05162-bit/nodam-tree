@@ -8,7 +8,7 @@
     body {
         margin: 0;
         font-family: Arial, sans-serif;
-        background: linear-gradient(#cfefff, #f3fbff 60%, #ffffff);
+        background: linear-gradient(#cfefff, #f3fbff);
     }
 
     header {
@@ -34,7 +34,7 @@
     }
 
     input {
-        width: 170px;
+        width: 180px;
         padding: 10px;
         margin: 4px;
     }
@@ -51,77 +51,35 @@
         background: #1b5e20;
     }
 
-    /* 🌳 나무 영역 */
-    #tree-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 10px;
+    /* 흰 박스 */
+    #tree-box {
+        width: 560px;
+        height: 720px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
     }
 
     #tree-area {
         position: relative;
-        width: 520px;
-        height: 650px;
+        width: 100%;
+        height: 100%;
     }
 
-    /* 🌿 귀여운 나무 디자인 */
-    .tree {
+    svg {
         position: absolute;
-        left: 110px;
-        top: 40px;
-        width: 300px;
-        height: 520px;
-    }
-
-    /* 나무 잎 덩어리 (동글동글) */
-    .crown {
-        position: absolute;
-        top: 0;
         left: 0;
-        width: 300px;
-        height: 300px;
-        background: radial-gradient(circle at 30% 30%, #66bb6a, #2e7d32);
-        border-radius: 50%;
-        box-shadow: inset -10px -10px 0 rgba(0,0,0,0.1);
-    }
-
-    .crown2 {
-        position: absolute;
-        top: 40px;
-        left: -40px;
-        width: 200px;
-        height: 200px;
-        background: #43a047;
-        border-radius: 50%;
-    }
-
-    .crown3 {
-        position: absolute;
-        top: 50px;
-        left: 140px;
-        width: 210px;
-        height: 210px;
-        background: #4caf50;
-        border-radius: 50%;
-    }
-
-    /* 줄기 */
-    .trunk {
-        position: absolute;
-        bottom: 0;
-        left: 120px;
-        width: 60px;
-        height: 260px;
-        background: #8d6e63;
-        border-radius: 20px;
+        top: 0;
     }
 
     /* 잎 */
     .leaf {
         position: absolute;
         font-size: 18px;
-        animation: pop 0.4s ease;
-        z-index: 5;
+        animation: pop 0.3s ease;
     }
 
     @keyframes pop {
@@ -161,20 +119,23 @@
 
 <div class="input-box">
     <input id="nameInput" placeholder="학생 이름" />
-    <input id="textInput" placeholder="문장 입력 (예: 담배 안 피워요!)" />
+    <input id="textInput" placeholder="문장 입력" />
     <button onclick="addEntry()">추가</button>
 </div>
 
-<div id="tree-container">
+<!-- 흰 박스 -->
+<div id="tree-box">
     <div id="tree-area">
 
-        <!-- 🌿 귀여운 나무 -->
-        <div class="tree">
-            <div class="crown"></div>
-            <div class="crown2"></div>
-            <div class="crown3"></div>
-            <div class="trunk"></div>
-        </div>
+        <!-- 나무 -->
+        <svg width="560" height="720">
+            <ellipse cx="280" cy="230" rx="160" ry="120" fill="#2e7d32"/>
+            <ellipse cx="200" cy="320" rx="120" ry="100" fill="#388e3c"/>
+            <ellipse cx="360" cy="320" rx="120" ry="100" fill="#388e3c"/>
+            <ellipse cx="280" cy="160" rx="110" ry="90" fill="#43a047"/>
+
+            <rect x="260" y="380" width="40" height="260" fill="#6d4c41"/>
+        </svg>
 
     </div>
 </div>
@@ -187,7 +148,34 @@
 const treeArea = document.getElementById("tree-area");
 const log = document.getElementById("log");
 
-let count = 0;
+const usedPositions = [];
+
+function getNonOverlappingPosition() {
+    let x, y;
+
+    for (let i = 0; i < 50; i++) {
+        x = Math.random() * 260 + 140;
+        y = Math.random() * 260 + 120;
+
+        let ok = true;
+
+        for (let p of usedPositions) {
+            const dx = p.x - x;
+            const dy = p.y - y;
+            if (Math.sqrt(dx*dx + dy*dy) < 28) {
+                ok = false;
+                break;
+            }
+        }
+
+        if (ok) {
+            usedPositions.push({x, y});
+            return {x, y};
+        }
+    }
+
+    return {x, y};
+}
 
 function addEntry() {
     const name = document.getElementById("nameInput").value.trim();
@@ -201,22 +189,20 @@ function addEntry() {
     item.innerHTML = `<span class="name">${name}</span> : ${text}`;
     log.appendChild(item);
 
-    // 🌳 나무 “잎 내부 영역” (크라운 안쪽만)
-    const x = Math.random() * 220 + 140;
-    const y = Math.random() * 220 + 80;
+    // 🌿 위치
+    const pos = getNonOverlappingPosition();
 
     const leaf = document.createElement("div");
     leaf.className = "leaf";
 
-    const types = ["🍃", "🌸", "🍁"];
+    // 🍃 + 🌸만 사용 (단풍 제거)
+    const types = ["🍃", "🌸"];
     leaf.innerText = types[Math.floor(Math.random() * types.length)];
 
-    leaf.style.left = x + "px";
-    leaf.style.top = y + "px";
+    leaf.style.left = pos.x + "px";
+    leaf.style.top = pos.y + "px";
 
     treeArea.appendChild(leaf);
-
-    count++;
 }
 </script>
 
