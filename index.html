@@ -8,7 +8,7 @@
     body {
         margin: 0;
         font-family: Arial, sans-serif;
-        background: linear-gradient(#cfefff, #f3fbff);
+        background: linear-gradient(#d7f3ff, #ffffff);
     }
 
     header {
@@ -51,34 +51,34 @@
         background: #1b5e20;
     }
 
-    /* 흰 박스 */
-    #tree-box {
+    /* 🌳 하나의 큰 이모지 나무 */
+    #tree-area {
         width: 560px;
         height: 720px;
         margin: 0 auto;
+        position: relative;
         background: white;
         border-radius: 20px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        position: relative;
         overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
     }
 
-    #tree-area {
-        position: relative;
-        width: 100%;
-        height: 100%;
-    }
-
-    svg {
+    .big-tree {
+        font-size: 300px;
+        line-height: 1;
         position: absolute;
-        left: 0;
-        top: 0;
+        top: 20px;
+        user-select: none;
+        pointer-events: none;
     }
 
-    /* 잎 */
+    /* 🌸 잎/꽃 */
     .leaf {
         position: absolute;
-        font-size: 22px; /* 🔥 살짝 크게 */
+        font-size: 26px; /* 🔥 크게 */
         animation: pop 0.3s ease;
     }
 
@@ -113,7 +113,6 @@
 <body>
 
 <header>
-    <!-- 🌳 제목 변경 -->
     <h1>🌳 노담나무 🌳</h1>
     <h2>흡연 권유 거절, 노담 실천 문구 작성하기</h2>
 </header>
@@ -124,21 +123,11 @@
     <button onclick="addEntry()">추가</button>
 </div>
 
-<!-- 흰 박스 -->
-<div id="tree-box">
-    <div id="tree-area">
+<!-- 🌳 하나의 이모지 나무 = 배경 + 활동 합체 -->
+<div id="tree-area">
 
-        <!-- 나무 -->
-        <svg width="560" height="720">
-            <ellipse cx="280" cy="230" rx="160" ry="120" fill="#2e7d32"/>
-            <ellipse cx="200" cy="320" rx="120" ry="100" fill="#388e3c"/>
-            <ellipse cx="360" cy="320" rx="120" ry="100" fill="#388e3c"/>
-            <ellipse cx="280" cy="160" rx="110" ry="90" fill="#43a047"/>
+    <div class="big-tree">🌳</div>
 
-            <rect x="260" y="380" width="40" height="260" fill="#6d4c41"/>
-        </svg>
-
-    </div>
 </div>
 
 <div id="log">
@@ -151,19 +140,19 @@ const log = document.getElementById("log");
 
 const usedPositions = [];
 
-function getNonOverlappingPosition() {
+function getPosition() {
     let x, y;
 
     for (let i = 0; i < 50; i++) {
-        x = Math.random() * 260 + 140;
-        y = Math.random() * 260 + 120;
+        x = Math.random() * 260 + 150;
+        y = Math.random() * 280 + 120;
 
         let ok = true;
 
         for (let p of usedPositions) {
             const dx = p.x - x;
             const dy = p.y - y;
-            if (Math.sqrt(dx*dx + dy*dy) < 28) {
+            if (Math.sqrt(dx*dx + dy*dy) < 30) {
                 ok = false;
                 break;
             }
@@ -190,20 +179,13 @@ function addEntry() {
     item.innerHTML = `<span class="name">${name}</span> : ${text}`;
     log.appendChild(item);
 
-    // 위치
-    const pos = getNonOverlappingPosition();
-
+    // 🌸 더 많이 나오게
     const leaf = document.createElement("div");
     leaf.className = "leaf";
 
-    // 🌸 꽃이 더 많이 나오게 확률 조정
-    const rand = Math.random();
-    if (rand < 0.7) {
-        leaf.innerText = "🌸"; // 꽃 70%
-    } else {
-        leaf.innerText = "🍃"; // 잎 30%
-    }
+    leaf.innerText = Math.random() < 0.75 ? "🌸" : "🍃";
 
+    const pos = getPosition();
     leaf.style.left = pos.x + "px";
     leaf.style.top = pos.y + "px";
 
