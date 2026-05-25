@@ -3,77 +3,84 @@
 <head>
 <meta charset="UTF-8" />
 <title>노담나무 푸릇푸릇한</title>
+
 <style>
-    body {
-        margin: 0;
-        font-family: 'Arial', sans-serif;
-        background: linear-gradient(to top, #c6f6d5, #e6fffa, #f0fff4);
-        overflow: hidden;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to top, #d7fbe8, #f0fff4, #ffffff);
+    overflow: hidden;
+}
 
-    h1 {
-        text-align: center;
-        margin-top: 20px;
-        color: #22543d;
-    }
+/* 제목 */
+h1 {
+    text-align: center;
+    margin-top: 15px;
+    color: #22543d;
+}
 
-    h3 {
-        text-align: center;
-        margin-top: -10px;
-        color: #2f855a;
-        font-weight: normal;
-    }
+h3 {
+    text-align: center;
+    margin-top: -10px;
+    color: #2f855a;
+    font-weight: normal;
+}
 
-    #container {
-        position: relative;
-        width: 100vw;
-        height: 90vh;
-    }
+/* 전체 영역 */
+#container {
+    position: relative;
+    width: 100vw;
+    height: 90vh;
+}
 
-    /* 나무 */
-    #tree {
-        position: absolute;
-        left: 50%;
-        bottom: 20px;
-        transform: translateX(-50%);
-        width: 350px;
-        height: 500px;
-        background: url("https://i.imgur.com/3ZQ3Z9M.png");
-        background-size: contain;
-        background-repeat: no-repeat;
-    }
+/* 🌳 나무 (배경 이미지 핵심) */
+#tree {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 650px;
 
-    /* 생성되는 요소 */
-    .item {
-        position: absolute;
-        font-size: 26px;
-        pointer-events: none;
-        animation: pop 0.4s ease;
-    }
+    background-image: url("https://i.imgur.com/3ZQ3Z9M.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom;
+}
 
-    @keyframes pop {
-        from { transform: scale(0); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
+/* 잎/꽃/단풍 */
+.item {
+    position: absolute;
+    font-size: 28px;
+    transform: translate(-50%, -50%);
+    animation: pop 0.3s ease;
+    pointer-events: none;
+}
 
-    #btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        padding: 10px 15px;
-        border: none;
-        background: #38a169;
-        color: white;
-        border-radius: 10px;
-        cursor: pointer;
-    }
+@keyframes pop {
+    from { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* 버튼 */
+#btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    border: none;
+    background: #38a169;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
 <h1>노담나무 푸릇푸릇한</h1>
-<h3>“담배 없이도 충분히 푸르게 자라요”</h3>
+<h3>흡연 권유 거절 문구</h3>
 
 <div id="container">
     <div id="tree"></div>
@@ -87,31 +94,27 @@ const btn = document.getElementById("btn");
 let index = 0;
 const items = ["🍃", "🌸", "🍁"];
 
-// 나무 영역 내부 랜덤 좌표 생성
-function getRandomPosition() {
-    const rect = tree.getBoundingClientRect();
-
-    // 나무 내부만 (중앙 기준 살짝 위쪽 집중)
-    const x = rect.left + Math.random() * rect.width;
-    const y = rect.top + Math.random() * (rect.height * 0.75);
-
-    return { x, y };
-}
-
-btn.addEventListener("click", () => {
+function addItem() {
     const item = document.createElement("div");
     item.className = "item";
     item.innerText = items[index];
 
-    const pos = getRandomPosition();
-    item.style.left = pos.x + "px";
-    item.style.top = pos.y + "px";
+    const rect = tree.getBoundingClientRect();
+
+    // 🌳 핵심: 나무 "안쪽 영역"만 좌표 생성
+    const x = rect.left + rect.width * (0.25 + Math.random() * 0.5);
+    const y = rect.top + rect.height * (0.15 + Math.random() * 0.6);
+
+    item.style.left = x + "px";
+    item.style.top = y + "px";
 
     document.body.appendChild(item);
 
     index = (index + 1) % items.length;
-});
+}
+
+btn.addEventListener("click", addItem);
 </script>
 
 </body>
-</html>
+</html
