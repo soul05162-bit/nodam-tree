@@ -78,7 +78,7 @@
     /* 잎 */
     .leaf {
         position: absolute;
-        font-size: 18px;
+        font-size: 22px; /* 🔥 살짝 크게 */
         animation: pop 0.3s ease;
     }
 
@@ -113,7 +113,8 @@
 <body>
 
 <header>
-    <h1>🌳 노담나무 만들기</h1>
+    <!-- 🌳 제목 변경 -->
+    <h1>🌳 노담나무 🌳</h1>
     <h2>흡연 권유 거절, 노담 실천 문구 작성하기</h2>
 </header>
 
@@ -189,15 +190,19 @@ function addEntry() {
     item.innerHTML = `<span class="name">${name}</span> : ${text}`;
     log.appendChild(item);
 
-    // 🌿 위치
+    // 위치
     const pos = getNonOverlappingPosition();
 
     const leaf = document.createElement("div");
     leaf.className = "leaf";
 
-    // 🍃 + 🌸만 사용 (단풍 제거)
-    const types = ["🍃", "🌸"];
-    leaf.innerText = types[Math.floor(Math.random() * types.length)];
+    // 🌸 꽃이 더 많이 나오게 확률 조정
+    const rand = Math.random();
+    if (rand < 0.7) {
+        leaf.innerText = "🌸"; // 꽃 70%
+    } else {
+        leaf.innerText = "🍃"; // 잎 30%
+    }
 
     leaf.style.left = pos.x + "px";
     leaf.style.top = pos.y + "px";
