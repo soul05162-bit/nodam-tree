@@ -2,119 +2,173 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<title>🌳노담나무🌳</title>
+<title>노담나무 만들기</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to top, #d7fbe8, #f0fff4, #ffffff);
-    overflow: hidden;
-}
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(#bfe9ff, #e8f7ff 60%, #ffffff);
+        overflow-x: hidden;
+    }
 
-/* 제목 */
-h1 {
-    text-align: center;
-    margin-top: 15px;
-    color: #22543d;
-}
+    header {
+        text-align: center;
+        padding: 20px;
+    }
 
-h3 {
-    text-align: center;
-    margin-top: -10px;
-    color: #2f855a;
-    font-weight: normal;
-}
+    h1 {
+        margin: 10px 0 5px;
+        font-size: 32px;
+        color: #2b5d34;
+    }
 
-/* 전체 영역 */
-#container {
-    position: relative;
-    width: 100vw;
-    height: 90vh;
-}
+    h2 {
+        margin: 0;
+        font-weight: normal;
+        color: #4a7c59;
+    }
 
-/* 🌳 나무 (배경 이미지 핵심) */
-#tree {
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    transform: translateX(-50%);
-    width: 500px;
-    height: 650px;
+    .container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        position: relative;
+    }
 
-    background-image: url("https://i.imgur.com/3ZQ3Z9M.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: bottom;
-}
+    /* 나무 영역 */
+    #tree-area {
+        position: relative;
+        width: 500px;
+        height: 650px;
+    }
 
-/* 잎/꽃/단풍 */
-.item {
-    position: absolute;
-    font-size: 28px;
-    transform: translate(-50%, -50%);
-    animation: pop 0.3s ease;
-    pointer-events: none;
-}
+    /* 입력 영역 */
+    .input-box {
+        text-align: center;
+        margin-top: 20px;
+    }
 
-@keyframes pop {
-    from { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-}
+    input {
+        width: 300px;
+        padding: 10px;
+        font-size: 14px;
+    }
 
-/* 버튼 */
-#btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 10px 15px;
-    border: none;
-    background: #38a169;
-    color: white;
-    border-radius: 10px;
-    cursor: pointer;
-}
+    button {
+        padding: 10px 15px;
+        background: #2e7d32;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #1b5e20;
+    }
+
+    /* 생성된 잎 */
+    .leaf {
+        position: absolute;
+        font-size: 18px;
+        user-select: none;
+        pointer-events: none;
+        animation: pop 0.4s ease;
+    }
+
+    @keyframes pop {
+        from { transform: scale(0); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* 기록 */
+    #log {
+        margin: 20px auto;
+        width: 80%;
+        max-width: 700px;
+        background: rgba(255,255,255,0.8);
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .log-item {
+        border-bottom: 1px solid #ddd;
+        padding: 5px;
+        font-size: 14px;
+    }
 </style>
 </head>
 
 <body>
 
-<h1>🌳노담나무🌳</h1>
-<h3>흡연 권유 거절 문구</h3>
+<header>
+    <h1>🌳 노담나무 만들기</h1>
+    <h2>흡연 권유 거절, 노담 실천 문구 작성하기</h2>
+</header>
 
-<div id="container">
-    <div id="tree"></div>
-    <button id="btn">하나 추가 🌱</button>
+<div class="input-box">
+    <input id="textInput" placeholder="문장을 입력하세요 (예: 담배 안 피울래요!)" />
+    <button onclick="addText()">추가</button>
+</div>
+
+<div class="container">
+    <div id="tree-area">
+
+        <!-- 나무 (SVG) -->
+        <svg width="500" height="650">
+            <!-- 줄기 -->
+            <rect x="230" y="350" width="40" height="250" fill="#6d4c41"/>
+            
+            <!-- 나무 잎 덩어리 -->
+            <circle cx="250" cy="250" r="120" fill="#2e7d32"/>
+            <circle cx="180" cy="300" r="90" fill="#388e3c"/>
+            <circle cx="320" cy="300" r="90" fill="#388e3c"/>
+            <circle cx="250" cy="180" r="90" fill="#43a047"/>
+        </svg>
+
+    </div>
+</div>
+
+<div id="log">
+    <b>작성 기록</b>
 </div>
 
 <script>
-const tree = document.getElementById("tree");
-const btn = document.getElementById("btn");
+const treeArea = document.getElementById("tree-area");
+const log = document.getElementById("log");
 
-let index = 0;
-const items = ["🍃", "🌸", "🍁"];
+function addText() {
+    const input = document.getElementById("textInput");
+    const text = input.value.trim();
+    if (!text) return;
 
-function addItem() {
-    const item = document.createElement("div");
-    item.className = "item";
-    item.innerText = items[index];
+    // 기록 추가
+    const div = document.createElement("div");
+    div.className = "log-item";
+    div.innerText = text;
+    log.appendChild(div);
 
-    const rect = tree.getBoundingClientRect();
+    // 나무 안 랜덤 위치 (대략 잎 영역)
+    const area = treeArea.getBoundingClientRect();
 
-    // 🌳 핵심: 나무 "안쪽 영역"만 좌표 생성
-    const x = rect.left + rect.width * (0.25 + Math.random() * 0.5);
-    const y = rect.top + rect.height * (0.15 + Math.random() * 0.6);
+    const x = Math.random() * 300 + 100;  // 나무 중심 영역
+    const y = Math.random() * 300 + 120;
 
-    item.style.left = x + "px";
-    item.style.top = y + "px";
+    const span = document.createElement("div");
+    span.className = "leaf";
 
-    document.body.appendChild(item);
+    // 종류 랜덤 (잎 / 꽃 / 단풍)
+    const items = ["🍃", "🌸", "🍁"];
+    span.innerText = items[Math.floor(Math.random() * items.length)];
 
-    index = (index + 1) % items.length;
+    span.style.left = x + "px";
+    span.style.top = y + "px";
+
+    treeArea.appendChild(span);
+
+    input.value = "";
 }
-
-btn.addEventListener("click", addItem);
 </script>
 
 </body>
-</html
+</html>
