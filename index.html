@@ -51,26 +51,32 @@
         background: #1b5e20;
     }
 
-    /* 🌳 하나의 큰 이모지 나무 */
-    #tree-area {
-        width: 560px;
-        height: 720px;
+    /* 🟦 흰 카드 */
+    #tree-box {
+        width: 600px;
+        height: 750px;
         margin: 0 auto;
-        position: relative;
         background: white;
         border-radius: 20px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        position: relative;
         overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
     }
 
+    #tree-area {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* 🌳 큰 중심 나무 */
     .big-tree {
-        font-size: 300px;
-        line-height: 1;
         position: absolute;
-        top: 20px;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 420px; /* 🔥 핵심: 크게 */
+        opacity: 0.95;
         user-select: none;
         pointer-events: none;
     }
@@ -78,8 +84,8 @@
     /* 🌸 잎/꽃 */
     .leaf {
         position: absolute;
-        font-size: 26px; /* 🔥 크게 */
-        animation: pop 0.3s ease;
+        font-size: 28px; /* 🔥 조금 더 큼 */
+        animation: pop 0.25s ease;
     }
 
     @keyframes pop {
@@ -123,11 +129,14 @@
     <button onclick="addEntry()">추가</button>
 </div>
 
-<!-- 🌳 하나의 이모지 나무 = 배경 + 활동 합체 -->
-<div id="tree-area">
+<!-- 🟦 카드 안에 모든 구조 -->
+<div id="tree-box">
+    <div id="tree-area">
 
-    <div class="big-tree">🌳</div>
+        <!-- 🌳 중심 큰 나무 -->
+        <div class="big-tree">🌳</div>
 
+    </div>
 </div>
 
 <div id="log">
@@ -143,16 +152,16 @@ const usedPositions = [];
 function getPosition() {
     let x, y;
 
-    for (let i = 0; i < 50; i++) {
-        x = Math.random() * 260 + 150;
-        y = Math.random() * 280 + 120;
+    for (let i = 0; i < 60; i++) {
+        x = Math.random() * 420 + 80;  // 카드 안 전체 영역
+        y = Math.random() * 520 + 100;
 
         let ok = true;
 
         for (let p of usedPositions) {
             const dx = p.x - x;
             const dy = p.y - y;
-            if (Math.sqrt(dx*dx + dy*dy) < 30) {
+            if (Math.sqrt(dx*dx + dy*dy) < 35) {
                 ok = false;
                 break;
             }
