@@ -20,141 +20,107 @@ h1{
     width:500px;
     height:500px;
     margin:auto;
-    border:2px dashed #ccc;
-    border-radius:20px;
-    background:white;
+    overflow:hidden;
 }
 
+/* 🌳 나무 줄기 */
 #trunk{
     font-size:180px;
     position:absolute;
     bottom:0;
     left:50%;
-    transform:translateX(-50%);
+    transform:translateX(-50%) scale(1);
+    transition:1s;
 }
 
+/* 🍃 잎/꽃 */
 .leaf{
     position:absolute;
     font-size:26px;
-    cursor:pointer;
-    transition:0.3s;
+    transition:0.4s;
 }
 
 .leaf:hover{
     transform:scale(1.5) rotate(10deg);
 }
 
-input{
+input, button{
     padding:10px;
     margin:5px;
-}
-
-button{
-    padding:10px 15px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🌳 노담나무 캠페인 🌳</h1>
+<h1>🌳 노담나무 🌳</h1>
 
 <input id="name" placeholder="이름">
 <input id="text" placeholder="노담 다짐">
-<button onclick="addData()">등록</button>
+<button onclick="addLeaf()">등록</button>
 
 <div id="treeArea">
     <div id="trunk">🌳</div>
 </div>
 
-<script type="module">
+<script>
 
-// ===== Firebase =====
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+let growth = 0;
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// ===== 가지 위치 =====
+// 🌳 가지 위치 (위로 갈수록 작게 퍼짐)
 const branches = [
-  {x:240,y:180},{x:200,y:160},{x:280,y:160},
-  {x:170,y:130},{x:300,y:130},{x:220,y:100},
-  {x:260,y:100},{x:190,y:80},{x:290,y:80},
+  {x:240,y:200},
+  {x:200,y:180},
+  {x:280,y:180},
+  {x:170,y:150},
+  {x:300,y:150},
+  {x:220,y:120},
+  {x:260,y:120},
+  {x:190,y:90},
+  {x:290,y:90},
   {x:230,y:60}
 ];
 
-// ===== 데이터 저장 =====
-window.addData = async function(){
+function addLeaf(){
 
     const name = document.getElementById("name").value;
     const text = document.getElementById("text").value;
 
     if(name === "" || text === "") return;
 
-    await addDoc(collection(db,"leaves"),{
-        name,
-        text,
-        type: Math.random()>0.5?"🍃":"🌸"
-    });
-
-    document.getElementById("text").value="";
-}
-
-// ===== 실시간 반영 =====
-onSnapshot(collection(db,"leaves"),(snap)=>{
-
-    document.querySelectorAll(".leaf")
-    .forEach(e=>e.remove());
-
-    let i = 0;
-
-    snap.forEach(doc=>{
-
-        if(i >= branches.length) return;
-
-        const data = doc.data();
-        const p = branches[i];
-
-        const leaf = document.createElement("div");
-        leaf.className = "leaf";
-        leaf.innerHTML = data.type;
-
-        leaf.style.left = p.x + "px";
-        leaf.style.top = p.y + "px";
-
-        leaf.title = data.name + " : " + data.text;
-
-        // 클릭 애니메이션
-        leaf.onclick = () => {
-            leaf.style.transform = "scale(1.6) rotate(20deg)";
-            setTimeout(()=>leaf.style.transform="",300);
-        };
-
-        document.getElementById("treeArea").appendChild(leaf);
-
-        i++;
-    });
-
-    // 🌳 성장 효과 (간단)
-    const trunk = document.getElementById("trunk");
-
-    if(snap.size >= 30){
-        trunk.innerHTML = "🌳✨";
-    } else if(snap.size >= 10){
-        trunk.innerHTML = "🌳🌿";
-    } else {
-        trunk.innerHTML = "🌳";
+    if(growth >= branches.length){
+        alert("🌳 나무가 충분히 성장했어요!");
+        return;
     }
 
-});
+    // 🌳 성장 증가
+    growth++;
+
+    // 🌳 나무 커짐
+    const trunk = document.getElementById("trunk");
+    trunk.style.transform =
+        `translateX(-50%) scale(${1 + growth * 0.1})`;
+
+    // 🍃 잎 생성
+    const leaf = document.createElement("div");
+    leaf.className = "leaf";
+
+    leaf.innerHTML = Math.random() > 0.5 ? "🍃" : "🌸";
+
+    leaf.style.left = branches[growth-1].x + "px";
+    leaf.style.top = branches[growth-1].y + "px";
+
+    leaf.title = name + " : " + text;
+
+    // 클릭 효과
+    leaf.onclick = () => {
+        leaf.style.transform = "scale(1.6) rotate(15deg)";
+        setTimeout(()=>leaf.style.transform="",300);
+    };
+
+    document.getElementById("treeArea").appendChild(leaf);
+
+}
 
 </script>
 
