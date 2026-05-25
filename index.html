@@ -21,7 +21,6 @@ body{
     overflow:hidden;
 }
 
-/* 🌳 줄기 고정 */
 #trunk{
     position:absolute;
     bottom:0;
@@ -30,13 +29,14 @@ body{
     font-size:160px;
 }
 
-/* 🍃 잎 */
+/* 🍃 */
 .leaf{
     position:absolute;
     font-size:26px;
     transition:0.3s;
 }
 
+/* 📋 */
 #log{
     width:500px;
     margin:auto;
@@ -65,23 +65,39 @@ body{
 
 <script>
 
-let count = 0;
+const usedPositions = [];
 
-/* 🌳 “성장 영역” (핵심) */
-function getGrowArea(){
+/* 🌳 충돌 없는 위치 생성 */
+function getSafePosition(){
 
     const baseX = 250;
-    const baseBottom = 500;
+    const baseY = 550;
 
-    // 🌳 나무가 클수록 위로 영역 확장
-    const height = count * 12;
+    for(let i=0;i<100;i++){
 
-    return {
-        xMin: baseX - 80,
-        xMax: baseX + 80,
-        yMin: baseBottom - height,
-        yMax: baseBottom - 20
-    };
+        const x = baseX + (Math.random()*200 - 100);
+        const y = baseY - (Math.random()*400);
+
+        let ok = true;
+
+        for(const p of usedPositions){
+            const dx = p.x - x;
+            const dy = p.y - y;
+
+            if(Math.sqrt(dx*dx + dy*dy) < 30){
+                ok = false;
+                break;
+            }
+        }
+
+        if(ok){
+            usedPositions.push({x,y});
+            return {x,y};
+        }
+    }
+
+    // fallback
+    return {x:baseX, y:baseY};
 }
 
 function addLeaf(){
@@ -91,21 +107,15 @@ function addLeaf(){
 
     if(name === "" || text === "") return;
 
-    count++;
-
-    const area = getGrowArea();
-
-    /* 🍃 반드시 “현재 나무 영역 안”에서 생성 */
-    const x = Math.random() * (area.xMax - area.xMin) + area.xMin;
-    const y = Math.random() * (area.yMax - area.yMin) + area.yMin;
+    const pos = getSafePosition();
 
     const leaf = document.createElement("div");
     leaf.className = "leaf";
 
-    leaf.innerHTML = Math.random() > 0.5 ? "🍃" : "🌸";
+    leaf.innerHTML = Math.random()>0.5 ? "🍃" : "🌸";
 
-    leaf.style.left = x + "px";
-    leaf.style.top = y + "px";
+    leaf.style.left = pos.x + "px";
+    leaf.style.top = pos.y + "px";
 
     leaf.title = name + " : " + text;
 
@@ -115,7 +125,6 @@ function addLeaf(){
     document.getElementById("log").innerHTML +=
         `🌱 <b>${name}</b> : ${text}<br>`;
 
-    /* 입력 초기화 */
     document.getElementById("text").value = "";
 }
 
