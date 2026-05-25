@@ -213,7 +213,6 @@
 
 <div id="tree-box">
     <div id="dynamic-tree">🌳</div>
-
     <div id="tree-area"></div>
 </div>
 
@@ -222,14 +221,32 @@
     <div id="log-list"></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script>
+// [연결 완료] 선생님의 진짜 파이어베이스 설정값을 연동했습니다!
+const firebaseConfig = {
+  apiKey: "AIzaSyALLfaAws-3eXrnb_gBv9ynEZBuJMc6AGg",
+  authDomain: "tree-8c864.firebaseapp.com",
+  projectId: "tree-8c864",
+  storageBucket: "tree-8c864.firebasestorage.app",
+  messagingSenderId: "434728258229",
+  appId: "1:434728258229:web:ac4d19f209c21d25a6ccfc",
+  measurementId: "G-D0KRL6KJ06"
+};
+
+// 파이어베이스 시스템 가동
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore(); 
+
 const treeArea = document.getElementById("tree-area");
 const logList = document.getElementById("log-list");
 const dynamicTree = document.getElementById("dynamic-tree");
 const growthMsg = document.getElementById("growth-msg");
 
 const usedPositions = []; 
-let leafCount = 0; // 심어진 잎의 개수
+let leafCount = 0; 
 
 // 나무가 자라는 성장 단계 설정
 function updateTreeGrowth() {
@@ -256,7 +273,6 @@ function updateTreeGrowth() {
         statusText = "👑 울창한 노담 숲 단계 (최고의 노담 나무 탄생!)";
     }
 
-    // 크기 변환 애니메이션 적용
     dynamicTree.style.transform = `translate(-50%, -50%) scale(${scale})`;
     growthMsg.innerText = `✨ 현재 나무 상태: ${statusText}`;
 }
@@ -266,30 +282,25 @@ updateTreeGrowth();
 
 // 나무 이모지 타원 영역 내부에서만 좌표를 추출하는 함수
 function getTreePosition() {
-    const centerX = 300; // tree-box의 가로 중앙
-    const centerY = 240; // 나무 이모지 머리 부분이 위치한 세로 중앙
-
-    // 현재 나무가 자란 크기(scale)를 고려하여 생성 반경을 유연하게 조절
+    const centerX = 300; 
+    const centerY = 240; 
     let currentScale = parseFloat(dynamicTree.style.transform.split('scale(')[1]) || 1.0;
     
-    // 타원 반경 (기본 크기 기준)
     const rx = 130 * currentScale; 
     const ry = 110 * currentScale; 
 
     for (let i = 0; i < 300; i++) {
-        // 타원형 내부 좌표 추출 수학 공식 사용
         const angle = Math.random() * Math.PI * 2;
-        const radius = Math.sqrt(Math.random()); // 외곽 쪽에 너무 몰리지 않고 골고루 분산되도록 수정
+        const radius = Math.sqrt(Math.random()); 
 
         const x = centerX + Math.cos(angle) * rx * radius;
         const y = centerY + Math.sin(angle) * ry * radius;
 
-        // 겹침 검사 (아이템끼리 너무 달라붙지 않게 조절)
         let overlap = false;
         for (const p of usedPositions) {
             const dx = p.x - x;
             const dy = p.y - y;
-            if (Math.sqrt(dx * dx + dy * dy) < 22) { // 간격 수치
+            if (Math.sqrt(dx * dx + dy * dy) < 22) { 
                 overlap = true;
                 break;
             }
@@ -301,13 +312,13 @@ function getTreePosition() {
         }
     }
 
-    // 공간이 부족하면 기존 등록된 좌표 주변에 살짝 띄워서 배치
     return { 
         x: centerX + (Math.random() * 160 - 80), 
         y: centerY + (Math.random() * 120 - 60) 
     };
 }
 
+// [파이어베이스용 연동] 입력창의 데이터를 실시간으로 파이어베이스 DB에 저장
 function addEntry() {
     const nameInput = document.getElementById("nameInput");
     const textInput = document.getElementById("textInput");
@@ -320,36 +331,64 @@ function addEntry() {
         return;
     }
 
-    // 1. 하단 리스트에 기록 추가
-    const item = document.createElement("div");
-    item.className = "log-item";
-    item.innerHTML = `<span class="name">${name}</span> ${text}`;
-    
-    // 최신 글이 맨 위에 보이도록 처리
-    logList.insertBefore(item, logList.firstChild);
-
-    // 2. 나무 위에 잎/꽃 생성
-    const leaf = document.createElement("div");
-    leaf.className = "leaf";
-    
-    // 랜덤하게 초록잎, 단풍잎, 벚꽃, 네잎클로버 등 아이들이 좋아할 요소 배치
-    const items = ["🍃", "🌸", "🌿", "🍀", "🌼", "🌱"];
-    leaf.innerText = items[Math.floor(Math.random() * items.length)];
-
-    const pos = getTreePosition();
-    leaf.style.left = pos.x + "px";
-    leaf.style.top = pos.y + "px";
-
-    treeArea.appendChild(leaf);
-
-    // 3. 성장 카운트 증가 및 나무 성장 반영
-    leafCount++;
-    updateTreeGrowth();
-
-    // 4. 입력창 초기화 및 포커스 이동
-    textInput.value = "";
-    textInput.focus();
+    // 파이어베이스의 'nodamTree'라는 이름의 컬렉션(저장소)에 보관합니다.
+    db.collection("nodamTree").add({
+        studentName: name,
+        nodamText: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        // 성공 시 입력창 비우기
+        textInput.value = "";
+        textInput.focus();
+    })
+    .catch((error) => {
+        console.error("데이터 저장 실패: ", error);
+    });
 }
+
+// [파이어베이스용 연동] 실시간으로 DB를 감시하여 화면에 잎을 그리고 나무를 키우는 핵심 기능
+db.collection("nodamTree")
+    .orderBy("timestamp", "asc")
+    .onSnapshot((snapshot) => {
+        // 새 글이 들어올 때마다 화면을 한 번 리셋하고 처음부터 다시 그림으로써 겹침과 오작동을 원천 봉쇄합니다.
+        treeArea.innerHTML = "";
+        logList.innerHTML = "";
+        usedPositions.length = 0; 
+        leafCount = 0;            
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const name = data.studentName;
+            const text = data.nodamText;
+
+            // 1. 하단 리스트에 기록 추가
+            const item = document.createElement("div");
+            item.className = "log-item";
+            item.innerHTML = `<span class="name">${name}</span> ${text}`;
+            logList.insertBefore(item, logList.firstChild);
+
+            // 2. 나무 위에 잎/꽃 생성
+            const leaf = document.createElement("div");
+            leaf.className = "leaf";
+            
+            const items = ["🍃", "🌸", "🌿", "🍀", "🌼", "🌱"];
+            // 아이들이 적은 텍스트의 길이를 이용하여 나뭇잎 이모지가 새로고침할 때마다 바뀌지 않고 고정되도록 처리
+            const itemIndex = (name.length + text.length) % items.length;
+            leaf.innerText = items[itemIndex];
+
+            const pos = getTreePosition();
+            leaf.style.left = pos.x + "px";
+            leaf.style.top = pos.y + "px";
+
+            treeArea.appendChild(leaf);
+
+            leafCount++;
+        });
+
+        // 잎이 모두 생성된 후 전체적인 나무 성장 상태 업데이트
+        updateTreeGrowth();
+    });
 
 // 엔터키 입력 지원
 document.getElementById("textInput").addEventListener("keyup", function(event) {
