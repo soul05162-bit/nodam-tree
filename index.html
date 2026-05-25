@@ -1,1 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>노담나무</title>
 
+<style>
+body{
+    text-align:center;
+    background:#eef9ee;
+    font-family:"맑은 고딕";
+}
+
+h1{
+    color:#2e7d32;
+}
+
+#treeArea{
+    position:relative;
+    width:500px;
+    height:500px;
+    margin:30px auto;
+}
+
+#tree{
+    font-size:250px;
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.leaf{
+    position:absolute;
+    font-size:30px;
+}
+
+#messages{
+    width:600px;
+    margin:20px auto;
+    text-align:left;
+    background:white;
+    padding:15px;
+    border-radius:10px;
+}
+
+input{
+    width:350px;
+    padding:10px;
+}
+
+button{
+    padding:10px 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌳 노담나무 🌳</h1>
+
+<p>노담 다짐이나 응원 문구를 작성해 보세요!</p>
+
+<div id="treeArea">
+    <div id="tree">🌳</div>
+</div>
+
+<input type="text" id="promise" placeholder="노담 문구 입력">
+<button onclick="addLeaf()">추가하기</button>
+
+<div id="messages">
+    <h3>🍃 노담 약속</h3>
+</div>
+
+<script>
+
+let count = 0;
+
+function addLeaf(){
+
+    let text = document.getElementById("promise").value;
+
+    if(text.trim() === ""){
+        alert("문구를 입력하세요!");
+        return;
+    }
+
+    count++;
+
+    let leaf = document.createElement("div");
+    leaf.className = "leaf";
+
+    leaf.innerHTML =
+        Math.random() > 0.5 ? "🍃" : "🌸";
+
+    leaf.style.left =
+        (80 + Math.random()*320) + "px";
+
+    leaf.style.top =
+        (50 + Math.random()*250) + "px";
+
+    document.getElementById("treeArea")
+            .appendChild(leaf);
+
+    document.getElementById("messages")
+            .innerHTML +=
+            "<p>" + count + ". " + text + "</p>";
+
+    document.getElementById("promise").value="";
+}
+
+</script>
+
+</body>
+</html>
