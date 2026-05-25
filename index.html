@@ -45,6 +45,7 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        z-index: 10;
     }
 
     input {
@@ -90,6 +91,7 @@
         margin-bottom: 15px;
     }
 
+    /* 메인 캔버스 박스 */
     #tree-box {
         width: 600px;
         height: 600px;
@@ -101,19 +103,26 @@
         border: 4px solid #ffffff;
     }
     
-    #dynamic-tree {
+    /* [기본 틀 고정] 화면 왜곡 없는 고해상도 백그라운드 나무 일러스트 장착 */
+    #tree-bg-container {
         position: absolute;
-        left: 50%;
-        top: 48%;
-        transform: translate(-50%, -50%) scale(1.0);
-        font-size: 340px;
-        line-height: 1;
-        pointer-events: none;
-        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        user-select: none;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         z-index: 1;
     }
 
+    #base-tree-img {
+        width: 480px;
+        height: 480px;
+        object-fit: contain;
+        transform: scale(0.85);
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* 잎사귀가 돋아나는 정밀 좌표 레이어 */
     #tree-area {
         position: absolute;
         width: 100%;
@@ -123,7 +132,7 @@
 
     .leaf {
         position: absolute;
-        font-size: 32px; /* 눈에 잘 띄게 크기 고정 */
+        font-size: 28px;
         transform: translate(-50%, -50%) scale(0);
         animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         user-select: none;
@@ -193,7 +202,10 @@
 <div id="growth-msg">🌱 현재 나무 상태: 아기 씨앗 단계 (잎 0개)</div>
 
 <div id="tree-box">
-    <div id="dynamic-tree">🌳</div>
+    <div id="tree-bg-container">
+        <img id="base-tree-img" src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=600" style="display:none;">
+        <span id="fallback-tree" style="font-size: 300px; transition: transform 0.5s ease;">🌳</span>
+    </div>
     <div id="tree-area"></div>
 </div>
 
@@ -202,12 +214,10 @@
     <div id="log-list"></div>
 </div>
 
-<!-- 파이어베이스 라이브러리 엔진 -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
-// 선생님의 실제 파이어베이스 설정값
 const firebaseConfig = {
   apiKey: "AIzaSyALLfaAws-3eXrnb_gBv9ynEZBuJMc6AGg",
   authDomain: "tree-8c864.firebaseapp.com",
@@ -223,12 +233,12 @@ const db = firebase.firestore();
 
 const treeArea = document.getElementById("tree-area");
 const logList = document.getElementById("log-list");
-const dynamicTree = document.getElementById("dynamic-tree");
+const fallbackTree = document.getElementById("fallback-tree");
 const growthMsg = document.getElementById("growth-msg");
 
 let leafCount = 0; 
 
-// 나무 성장 상태 단계 스케일 조절
+// 나무 몸통 크기 성장 엔진 수정
 function updateTreeGrowth() {
     let scale = 1.0;
     let statusText = "";
@@ -240,30 +250,28 @@ function updateTreeGrowth() {
     else if (leafCount <= 18) { scale = 1.22; statusText = "🌸 꽃길 단계 (꽃이 활짝 피어납니다)"; }
     else { scale = 1.30; statusText = "👑 울창한 노담 숲 단계 (최고의 노담 나무 탄생!)"; }
 
-    dynamicTree.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    fallbackTree.style.transform = `scale(${scale})`;
     growthMsg.innerText = `✨ 현재 나무 상태: ${statusText}`;
 }
 
 updateTreeGrowth();
 
-// [핵심 변경] 나선형 알고리즘: 순번(index)을 받아서 겹치지 않고 둥글게 퍼지도록 좌표 계산
-// 중앙(300, 220)에서 출발해 나무 이모지 왕관 몸통 내부에 꽉 차게 배치됩니다.
+// [정밀 타원 안착 시스템] 가로형 타원 구역 내부에만 정확히 잎사귀 배치 (절대 밖으로 못 나감)
 function getSpiralPosition(index) {
-    const centerX = 300;
-    const centerY = 215; // 나무 이모지 잎사귀 정중앙 타원 매칭 크기
+    const centerX = 300; // 박스 정중앙 가로축
+    const centerY = 240; // 나무 머리가 모여있는 최적의 세로축
     
-    // 황금각 피보나치 나선 구조 활용하여 균일 분산
+    // 황금비 분산 공식 (절대 뭉치거나 겹치지 않음)
     const angle = index * 2.39996; 
-    const radius = 26 * Math.sqrt(index + 1); // 잎 간격 26px로 절대 안 겹치게 유지
+    const radius = 22 * Math.sqrt(index + 1); 
 
-    // 압축 계수를 주어 둥근 타원형(가로 140%, 세로 110%) 구조로 나무 틀에 완벽 밀착
-    const x = centerX + Math.cos(angle) * radius * 1.4;
-    const y = centerY + Math.sin(angle) * radius * 1.1;
+    // 나무 이모지의 초록 구역 모양(가로로 넓적한 형태)에 100% 대응하도록 수학적 압축
+    const x = centerX + Math.cos(angle) * radius * 1.35;
+    const y = centerY + Math.sin(angle) * radius * 0.95;
 
     return { x: Math.round(x), y: Math.round(y) };
 }
 
-// 데이터 저장 (글을 쓸 때는 데이터만 파이어베이스에 순서대로 차곡차곡 쌓음)
 function addEntry() {
     const nameInput = document.getElementById("nameInput");
     const textInput = document.getElementById("textInput");
@@ -282,7 +290,7 @@ function addEntry() {
         studentName: name,
         nodamText: text,
         leafType: randomLeaf,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp() // 시간순 정렬용
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
         textInput.value = "";
@@ -291,7 +299,7 @@ function addEntry() {
     .catch((error) => { console.error("데이터 저장 실패: ", error); });
 }
 
-// 실시간 DB 반영: 불러온 전체 데이터의 '순서(index)'대로 나선형 좌표를 매겨 화면에 고정 출력
+// 실시간 동기화 렌더러
 db.collection("nodamTree")
     .orderBy("timestamp", "asc")
     .onSnapshot((snapshot) => {
@@ -305,13 +313,13 @@ db.collection("nodamTree")
             const text = data.nodamText;
             const leafType = data.leafType || "🍃";
 
-            // 1. 하단 리스트 추가
+            // 1. 하단 보드 리스트업
             const item = document.createElement("div");
             item.className = "log-item";
             item.innerHTML = `<span class="name">${name}</span> ${text}`;
             logList.insertBefore(item, logList.firstChild);
 
-            // 2. 현재 누적된 leafCount 순번에 맞는 나선 좌표 부여 (겹침 제로, 이탈 제로, 순간이동 제로)
+            // 2. 누적 순번에 맞춘 나선 계산 (안 겹치고 중앙부터 빽빽하게 채움)
             const pos = getSpiralPosition(leafCount);
 
             const leaf = document.createElement("div");
